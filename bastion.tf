@@ -17,7 +17,7 @@ resource "aws_security_group_rule" "bastion_sg_egress_rule" {
 
 resource "aws_instance" "bastion" {
   ami           = "ami-0233214e13e500f77"
-  instance_type = "t3.micro"
+  instance_type = "t2.micro"
   vpc_security_group_ids = [aws_security_group.bastion_sg.id]
   key_name = local.bastion_key_pair
   associate_public_ip_address = true
