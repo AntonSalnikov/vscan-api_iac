@@ -69,6 +69,16 @@ resource "aws_security_group" "vscan-api-security-group" {
   vpc_id = module.vpc.vpc_id
 }
 
+resource "aws_security_group_rule" "node_sg_ingress_rule_from_alb" {
+  from_port = 0
+  protocol = "-1"
+  security_group_id = aws_security_group.vscan-api-security-group.id
+  source_security_group_id = aws_security_group.alb_sg.id
+  to_port = 0
+  type = "ingress"
+  description = "Provides access from ALB"
+}
+
 resource "aws_security_group_rule" "vscan-api_sg_egress_rule" {
   from_port = 0
   protocol = "-1"
