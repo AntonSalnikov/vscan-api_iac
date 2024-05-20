@@ -1,6 +1,6 @@
 
-resource "aws_iam_role" "document-handler-ecs-task-role" {
-  name = "document-handler-ecs-task-role"
+resource "aws_iam_role" "vscan-api-ecs-task-role" {
+  name = "vscan-api-ecs-task-role"
 
   assume_role_policy = <<EOF
 {
@@ -19,18 +19,18 @@ resource "aws_iam_role" "document-handler-ecs-task-role" {
 EOF
 }
 
-resource "aws_iam_role_policy_attachment" "document-handler-task-policy-attachment" {
-  role       = aws_iam_role.document-handler-ecs-task-role.name
-  policy_arn = aws_iam_policy.document-handler-task-policy.arn
+resource "aws_iam_role_policy_attachment" "vscan-api-task-policy-attachment" {
+  role       = aws_iam_role.vscan-api-ecs-task-role.name
+  policy_arn = aws_iam_policy.vscan-api-task-policy.arn
 }
 
 
-resource "aws_iam_policy" "document-handler-task-policy" {
-  name = "document-handler-task-policy"
+resource "aws_iam_policy" "vscan-api-task-policy" {
+  name = "vscan-api-task-policy"
 
   policy = <<EOF
 {
-    "Id": "document-handler-task-policy",
+    "Id": "vscan-api-task-policy",
     "Version": "2012-10-17",
     "Statement": [
         {
@@ -172,97 +172,97 @@ resource "aws_iam_role_policy_attachment" "ecs-service-attach" {
 
 
 ### CICD role
-# data "aws_iam_openid_connect_provider" "github" {
-#   arn = format("arn:aws:iam::%s:oidc-provider/token.actions.githubusercontent.com",local.account_id)
-# }
-#
-# data "aws_iam_policy_document" "github_actions_assume_role" {
-#   statement {
-#     actions = ["sts:AssumeRoleWithWebIdentity"]
-#     principals {
-#       type        = "Federated"
-#       identifiers = [data.aws_iam_openid_connect_provider.github.arn]
-#     }
-#     condition {
-#       test     = "StringLike"
-#       variable = "token.actions.githubusercontent.com:sub"
-#       values   = ["repo:AntonSalnikov/DocumentHandler:*"]
-#     }
-#   }
-# }
-#
-# resource "aws_iam_role" "github_actions" {
-#   name               = "github-actions-AntonSalnikov-DocumentHandler"
-#   assume_role_policy = data.aws_iam_policy_document.github_actions_assume_role.json
-# }
-#
-# ####
-#
-# resource "aws_iam_policy" "github-actions-role-policy" {
-#   name = "github-actions-role-policy"
-#   policy = jsonencode({
-#     Version = "2012-10-17"
-#     Statement = [
-#       {
-#         Sid:"GetAuthorizationToken",
-#         Effect:"Allow",
-#         Action:[
-#           "ecr:GetAuthorizationToken"
-#         ],
-#         Resource:"*"
-#       },
-#       {
-#         Action = [
-#           "ecr:GetDownloadUrlForLayer",
-#           "ecr:BatchGetImage",
-#           "ecr:BatchCheckLayerAvailability",
-#           "ecr:PutImage",
-#           "ecr:InitiateLayerUpload",
-#           "ecr:UploadLayerPart",
-#           "ecr:CompleteLayerUpload"
-#         ]
-#         Effect   = "Allow"
-#         Resource = [
-#           aws_ecr_repository.document-handler-ecr.arn,
-#           "${aws_ecr_repository.document-handler-ecr.arn}/*",
-#         ]
-#       },
-#       {
-#         "Sid":"RegisterTaskDefinition",
-#         "Effect":"Allow",
-#         "Action":[
-#           "ecs:RegisterTaskDefinition",
-#           "ecs:DescribeTaskDefinition"
-#         ],
-#         "Resource":"*"
-#       },
-#       {
-#         "Sid":"PassRolesInTaskDefinition",
-#         "Effect":"Allow",
-#         "Action":[
-#           "iam:PassRole"
-#         ],
-#         "Resource":[
-#           aws_iam_role.document-handler-ecs-task-role.arn,
-#           aws_iam_role.ecs_execution_role.arn
-#         ]
-#       },
-#       {
-#         "Sid":"DeployService",
-#         "Effect":"Allow",
-#         "Action":[
-#           "ecs:UpdateService",
-#           "ecs:DescribeServices"
-#         ],
-#         "Resource":[
-#           aws_ecs_service.document-handler-backend-service.id
-#         ]
-#       }
-#     ]
-#   })
-# }
-#
-# resource "aws_iam_role_policy_attachment" "github_actions" {
-#   role       = aws_iam_role.github_actions.name
-#   policy_arn = aws_iam_policy.github-actions-role-policy.arn
-# }
+ data "aws_iam_openid_connect_provider" "github" {
+   arn = format("arn:aws:iam::%s:oidc-provider/token.actions.githubusercontent.com",local.account_id)
+ }
+
+ data "aws_iam_policy_document" "github_actions_assume_role" {
+   statement {
+     actions = ["sts:AssumeRoleWithWebIdentity"]
+     principals {
+       type        = "Federated"
+       identifiers = [data.aws_iam_openid_connect_provider.github.arn]
+     }
+     condition {
+       test     = "StringLike"
+       variable = "token.actions.githubusercontent.com:sub"
+       values   = ["repo:AntonSalnikov/vscan-api:*"]
+     }
+   }
+ }
+
+ resource "aws_iam_role" "github_actions" {
+   name               = "github-actions-AntonSalnikov-VSCANER-API"
+   assume_role_policy = data.aws_iam_policy_document.github_actions_assume_role.json
+ }
+
+ ####
+
+ resource "aws_iam_policy" "github-actions-role-policy" {
+   name = "github-actions-role-policy"
+   policy = jsonencode({
+     Version = "2012-10-17"
+     Statement = [
+       {
+         Sid:"GetAuthorizationToken",
+         Effect:"Allow",
+         Action:[
+           "ecr:GetAuthorizationToken"
+         ],
+         Resource:"*"
+       },
+       {
+         Action = [
+           "ecr:GetDownloadUrlForLayer",
+           "ecr:BatchGetImage",
+           "ecr:BatchCheckLayerAvailability",
+           "ecr:PutImage",
+           "ecr:InitiateLayerUpload",
+           "ecr:UploadLayerPart",
+           "ecr:CompleteLayerUpload"
+         ]
+         Effect   = "Allow"
+         Resource = [
+           aws_ecr_repository.vscan-api-ecr.arn,
+           "${aws_ecr_repository.vscan-api-ecr.arn}/*",
+         ]
+       },
+       {
+         "Sid":"RegisterTaskDefinition",
+         "Effect":"Allow",
+         "Action":[
+           "ecs:RegisterTaskDefinition",
+           "ecs:DescribeTaskDefinition"
+         ],
+         "Resource":"*"
+       },
+       {
+         "Sid":"PassRolesInTaskDefinition",
+         "Effect":"Allow",
+         "Action":[
+           "iam:PassRole"
+         ],
+         "Resource":[
+           aws_iam_role.vscan-api-ecs-task-role.arn,
+           aws_iam_role.ecs_execution_role.arn
+         ]
+       },
+       {
+         "Sid":"DeployService",
+         "Effect":"Allow",
+         "Action":[
+           "ecs:UpdateService",
+           "ecs:DescribeServices"
+         ],
+         "Resource":[
+           aws_ecs_service.vscan-api-backend-service.id
+         ]
+       }
+     ]
+   })
+ }
+
+ resource "aws_iam_role_policy_attachment" "github_actions" {
+   role       = aws_iam_role.github_actions.name
+   policy_arn = aws_iam_policy.github-actions-role-policy.arn
+ }

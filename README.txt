@@ -10,5 +10,5 @@ terraform workspace new test
 
 terraform workspace list
 terraform workspace select test
-terraform init -backend-config=config/test/test-backend.conf
+terraform init -backend-config=config/test-backend.conf
 terraform plan

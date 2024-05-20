@@ -1,5 +1,5 @@
-resource "aws_ecr_repository" "document-handler-ecr" {
-  name = "document-handler"
+resource "aws_ecr_repository" "vscan-api-ecr" {
+  name = "vscan-api"
 
   encryption_configuration {
     encryption_type = "KMS"
@@ -12,8 +12,8 @@ resource "aws_ecr_repository" "document-handler-ecr" {
   tags = local.tags
 }
 
-resource "aws_ecr_lifecycle_policy" "document-handler-ecr-policy" {
-  repository = aws_ecr_repository.document-handler-ecr.name
+resource "aws_ecr_lifecycle_policy" "vscan-api-ecr-policy" {
+  repository = aws_ecr_repository.vscan-api-ecr.name
 
   policy = <<EOF
 {

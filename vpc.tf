@@ -1,7 +1,6 @@
-#Full example - https://github.com/terraform-aws-modules/terraform-aws-vpc/blob/master/examples/complete-vpc/main.tf
 module "vpc" {
   source = "terraform-aws-modules/vpc/aws"
-  version = "2.70.0"
+  version = "5.8.1"
 
   name = local.vpc_name
   cidr = "10.0.0.0/16"
@@ -21,27 +20,26 @@ module "vpc" {
   #Create IGW for public subnets
   create_igw = true
   igw_tags   = local.tags
+}
 
-  # VPC endpoint for S3
-  enable_s3_endpoint = true
+module "vpc_vpc-endpoints" {
+  source  = "terraform-aws-modules/vpc/aws//modules/vpc-endpoints"
+  version = "5.8.1"
 
-  # VPC endpoint for DynamoDB
-  enable_dynamodb_endpoint = true
+  vpc_id = module.vpc.vpc_id
 
-  ecs_agent_endpoint_security_group_ids = [aws_security_group.document-handler-security-group.id]
-  enable_ecs_agent_endpoint = true
+  endpoints = {
+    s3 = {
+      service = "s3"
+    }
 
-  ecs_endpoint_security_group_ids = [aws_security_group.document-handler-security-group.id]
-  enable_ecs_endpoint = true
+    dynamodb = {
+      service = "dynamodb"
+    }
 
-  ecs_telemetry_endpoint_security_group_ids = [aws_security_group.document-handler-security-group.id]
-  enable_ecs_telemetry_endpoint = true
-
-  #Enable SSM Endpoint
-  ssm_endpoint_security_group_ids = [aws_security_group.document-handler-security-group.id]
-  enable_ssm_endpoint = true
-
-  #Enable Secret Manager Endpoint
-  secretsmanager_endpoint_security_group_ids = [aws_security_group.document-handler-security-group.id]
-  enable_secretsmanager_endpoint = true
+    ssm = {
+      service = "ssm",
+      security_group_ids = [aws_security_group.vscan-api-security-group.id]
+    }
+  }
 }

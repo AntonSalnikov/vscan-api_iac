@@ -31,8 +31,6 @@ locals {
       "prod" = "vscan-api-dirty-logs"
     }, local.environment, "")
 
-  rds_cluster_snapshot = lookup({ "dev" = "", "test" = "arn:aws:rds:eu-central-1:444672554014:cluster-snapshot:vscan-api-final-sahred-rds-snapshot", "prod" = "vscan-api-cluster-1-final-snapshot" }, local.environment, "")
-
   bastion_key_pair = lookup({ "dev" = "vscan-api-bastion-dev", "test" = "vscan-api-bastion-test", "prod" = "vscan-api-bastion" }, local.environment, "")
   account_id = data.aws_caller_identity.this.account_id
   region = lookup({ "dev" = "eu-west-1", "test" = "eu-central-1", "prod" = "eu-central-1" }, local.environment, "")
@@ -78,5 +76,7 @@ locals {
     "198.41.128.0/17"
   ])
 #   hosted_zone = lookup({ "dev" = "", "test" = "war-crimes.org.ua", "prod" = "vscan-api.gov.ua" }, local.environment, "")
+
+  public_domain_name = "vscan.dataslab.eu"
 }
 
