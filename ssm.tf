@@ -1,7 +1,7 @@
 
 
 resource "aws_ssm_parameter" "cloud_aws_sqs_queue_file_data" {
-  name = "/config/${local.application_name}_${terraform.workspace}/cloud.aws.sqs.queue.file-data"
+  name = "/config/${local.application_name}_${terraform.workspace}/cloud.aws.sqs.queue.file-upload-queue"
   type = "String"
   value = aws_sqs_queue.file-upload-queue.name
 }

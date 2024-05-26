@@ -1,6 +1,10 @@
+locals {
+  file-upload-queue-name = "file-upload-queue"
+}
+
 
 resource "aws_sqs_queue" "file-upload-queue" {
-  name = "FileUpload"
+  name = "${local.file-upload-queue-name}-${terraform.workspace}"
   delay_seconds = 5
   message_retention_seconds = 86400
   receive_wait_time_seconds = 20 #enable long polling to minimise costs
@@ -57,7 +61,7 @@ POLICY
 }
 
 resource "aws_sqs_queue" "file-upload-queue-dlq" {
-  name = "FileUpload-DLQ"
+  name = "${local.file-upload-queue-name}-${terraform.workspace}-DLQ"
   message_retention_seconds = 1209600
 
   sqs_managed_sse_enabled = true
