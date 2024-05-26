@@ -9,10 +9,12 @@ resource "aws_s3_bucket" "dirty_storage_bucket" {
   tags = var.tags
 }
 
-# resource "aws_s3_bucket_acl" "dirty_storage_bucket_acl" {
-#   bucket = aws_s3_bucket.dirty_storage_bucket.id
-#   acl    = "private"
-# }
+resource "aws_s3_bucket_acl" "dirty_storage_bucket_acl" {
+  depends_on = [aws_s3_bucket_ownership_controls.dirty_storage_bucket_ownership_controls]
+
+  bucket = aws_s3_bucket.dirty_storage_bucket.id
+  acl    = "private"
+}
 
 resource "aws_s3_bucket_ownership_controls" "dirty_storage_bucket_ownership_controls" {
   bucket = aws_s3_bucket.dirty_storage_bucket.id
@@ -26,6 +28,20 @@ resource "aws_s3_bucket_ownership_controls" "dirty_storage_bucket_ownership_cont
 resource "aws_s3_bucket_versioning" "dirty_storage_bucket_versioning" {
   bucket = aws_s3_bucket.dirty_storage_bucket.id
   versioning_configuration {
+    status = "Suspended"
+  }
+}
+
+resource "aws_s3_bucket_lifecycle_configuration" "dirty_bucket_lifecycle_configuration" {
+  bucket = aws_s3_bucket.dirty_storage_bucket.id
+
+  rule {
+    id = "ttl-rule"
+
+    expiration {
+      days = 30
+    }
+
     status = "Enabled"
   }
 }
