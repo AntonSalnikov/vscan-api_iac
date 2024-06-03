@@ -10,8 +10,8 @@ resource "aws_route53_record" "app" {
   type    = "A"
 
   alias {
-    name                   = aws_alb.vscan-api-alb.dns_name
-    zone_id                = aws_alb.vscan-api-alb.zone_id
+    name                   = aws_lb.vscan-network-alb.dns_name
+    zone_id                = aws_lb.vscan-network-alb.zone_id
     evaluate_target_health = true
   }
 }

@@ -8,12 +8,12 @@ resource "aws_security_group" "alb_sg" {
   tags = merge(local.tags, {Name: "application_lb_sg"})
 }
 
-resource "aws_security_group_rule" "alb_sg_ingress_rule_from_80" {
-  from_port = 80
+resource "aws_security_group_rule" "alb_sg_ingress_rule_from_48081" {
+  from_port = 48081
   protocol = "TCP"
   security_group_id = aws_security_group.alb_sg.id
   cidr_blocks = ["0.0.0.0/0"]
-  to_port = 80
+  to_port = 48081
   type = "ingress"
   description = "Provides access on 80 port"
 }
@@ -39,10 +39,10 @@ resource "aws_security_group_rule" "alb_sg_egress_rule" {
 
 data "aws_elb_service_account" "main" {}
 
-resource "aws_alb" "vscan-api-alb" {
-  name               = "vscan-api-alb"
+resource "aws_lb" "vscan-network-alb" {
+  name               = "vscan-tcp-nlb"
   internal           = false
-  load_balancer_type = "application"
+  load_balancer_type = "network"
   security_groups    = [aws_security_group.alb_sg.id]
   subnets            = module.vpc.public_subnets
 
@@ -53,10 +53,10 @@ resource "aws_alb" "vscan-api-alb" {
   tags = local.tags
 }
 
-resource "aws_alb_target_group" "vsacn_api_backend_tg" {
+resource "aws_lb_target_group" "vsacn_api_backend_tg" {
   name     = local.application_name
   port     = local.container_http_port
-  protocol = "HTTP"
+  protocol = "TCP"
   vpc_id   = module.vpc.vpc_id
 
   tags = local.tags
@@ -69,24 +69,28 @@ resource "aws_alb_target_group" "vsacn_api_backend_tg" {
     timeout = 3
   }
 
-  depends_on = [aws_alb.vscan-api-alb]
+  depends_on = [aws_lb.vscan-network-alb]
 }
 
 
-resource "aws_lb_listener" "http-listener" {
-  load_balancer_arn = aws_alb.vscan-api-alb.arn
-  port              = 80
-  protocol          = "HTTP"
+resource "aws_lb_target_group" "vsacn_tcp_backend_tg" {
+  name     = "${local.application_name}-tcp"
+  port     = local.container_tcp_port
+  protocol = "TCP"
+  vpc_id   = module.vpc.vpc_id
 
-  default_action {
-    type = "redirect"
+  tags = local.tags
+  deregistration_delay = 120
+  target_type = "ip"
 
-    redirect {
-      port        = "443"
-      protocol    = "HTTPS"
-      status_code = "HTTP_301"
-    }
+  health_check {
+    port = "8080"
+    path = "/health"
+    interval = 5
+    timeout = 3
   }
+
+  depends_on = [aws_lb.vscan-network-alb]
 }
 
 data "aws_acm_certificate" "public_domain_name_cert" {
@@ -94,35 +98,25 @@ data "aws_acm_certificate" "public_domain_name_cert" {
 }
 
 resource "aws_lb_listener" "https-listener" {
-  load_balancer_arn = aws_alb.vscan-api-alb.arn
+  load_balancer_arn = aws_lb.vscan-network-alb.arn
   port              = "443"
-  protocol          = "HTTPS"
-  ssl_policy        = "ELBSecurityPolicy-2016-08"
+  protocol          = "TLS"
+  ssl_policy        = "ELBSecurityPolicy-TLS13-1-2-2021-06"
   certificate_arn   = data.aws_acm_certificate.public_domain_name_cert.arn
 
   default_action {
-    type = "fixed-response"
-
-    fixed_response {
-      content_type = "text/plain"
-      message_body = "No resource found"
-      status_code  = "404"
-    }
+    target_group_arn = aws_lb_target_group.vsacn_api_backend_tg.id
+    type             = "forward"
   }
 }
 
-resource "aws_lb_listener_rule" "api-access" {
-  listener_arn = aws_lb_listener.https-listener.arn
-  priority     = 100
+resource "aws_lb_listener" "tcp-listener" {
+  load_balancer_arn = aws_lb.vscan-network-alb.arn
+  port              = "48081"
+  protocol          = "TCP"
 
-  action {
-    target_group_arn = aws_alb_target_group.vsacn_api_backend_tg.arn
+  default_action {
+    target_group_arn = aws_lb_target_group.vsacn_tcp_backend_tg.id
     type             = "forward"
-  }
-
-  condition {
-    host_header {
-      values = [aws_route53_record.app.name]
-    }
   }
 }

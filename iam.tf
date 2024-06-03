@@ -93,6 +93,14 @@ resource "aws_iam_policy" "vscan-api-task-policy" {
                 "cloudwatch:PutMetricData"
             ],
             "Resource": "*"
+        },
+        {
+            "Sid": "SpecificTable",
+            "Effect": "Allow",
+            "Action": [
+                "dynamodb:*"
+            ],
+            "Resource": "${aws_dynamodb_table.file-scan-results-dynamodb-table.arn}"
         }
     ]
 }

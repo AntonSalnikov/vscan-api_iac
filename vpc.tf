@@ -22,24 +22,24 @@ module "vpc" {
   igw_tags   = local.tags
 }
 
-module "vpc_vpc-endpoints" {
-  source  = "terraform-aws-modules/vpc/aws//modules/vpc-endpoints"
-  version = "5.8.1"
-
-  vpc_id = module.vpc.vpc_id
-
-  endpoints = {
-    s3 = {
-      service = "s3"
-    }
-
-    dynamodb = {
-      service = "dynamodb"
-    }
-
-    ssm = {
-      service = "ssm",
-      security_group_ids = [aws_security_group.vscan-api-security-group.id]
-    }
-  }
-}
+#module "vpc_vpc-endpoints" {
+#  source  = "terraform-aws-modules/vpc/aws//modules/vpc-endpoints"
+#  version = "5.8.1"
+#
+#  vpc_id = module.vpc.vpc_id
+#
+#  endpoints = {
+#    s3 = {
+#      service = "s3"
+#    }
+#
+#    dynamodb = {
+#      service = "dynamodb"
+#    }
+#
+#    ssm = {
+#      service = "ssm",
+#      security_group_ids = [aws_security_group.vscan-api-security-group.id]
+#    }
+#  }
+#}

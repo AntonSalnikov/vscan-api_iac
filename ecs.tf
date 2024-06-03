@@ -5,6 +5,9 @@ locals {
 
   container_http_port = 8080
   host_http_port = 8080
+
+  container_tcp_port = 8081
+  host_tcp_port = 8081
 }
 
 resource aws_ecs_cluster "vscan-api-ecs-cluster" {
@@ -33,13 +36,17 @@ resource "aws_ecs_task_definition" "vscan-api-task-def" {
       {"name": "JAVA_TOOL_OPTIONS", "value": "-XX:MaxRAMPercentage=70"}
     ],
     "essential": true,
-    "image": "${local.vscan-api_backend_image_url}:latest",
+    "image": "${local.vscan-api_backend_image_url}:master_20_279c115a",
     "name": "vscan-api",
     "memoryReservation": 2048,
     "portMappings": [
       {
         "containerPort": ${local.container_http_port},
         "hostPort": ${local.host_http_port}
+      },
+      {
+        "containerPort": ${local.container_tcp_port},
+        "hostPort": ${local.host_tcp_port}
       }
     ],
     "logConfiguration": {
@@ -96,10 +103,18 @@ resource "aws_ecs_service" "vscan-api-backend-service" {
   desired_count   = 1
 
   load_balancer {
-    target_group_arn = aws_alb_target_group.vsacn_api_backend_tg.arn
+    target_group_arn = aws_lb_target_group.vsacn_api_backend_tg.arn
     container_name   = local.application_name
     container_port   = local.container_http_port
   }
+
+  load_balancer {
+    target_group_arn = aws_lb_target_group.vsacn_tcp_backend_tg.arn
+    container_name   = local.application_name
+    container_port   = local.container_tcp_port
+  }
+
+  health_check_grace_period_seconds = 120
 
   deployment_maximum_percent = 200
   deployment_minimum_healthy_percent = 100
@@ -113,7 +128,7 @@ resource "aws_ecs_service" "vscan-api-backend-service" {
 
   network_configuration {
     subnets = module.vpc.private_subnets
-    security_groups = [aws_security_group.vscan-api-security-group.id]
+    security_groups = [aws_security_group.vscan-api-security-group.id,aws_security_group.bastion_sg.id]
   }
 
   lifecycle {
