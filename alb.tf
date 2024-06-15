@@ -8,14 +8,14 @@ resource "aws_security_group" "alb_sg" {
   tags = merge(local.tags, {Name: "application_lb_sg"})
 }
 
-resource "aws_security_group_rule" "alb_sg_ingress_rule_from_48081" {
-  from_port = 48081
+resource "aws_security_group_rule" "alb_sg_ingress_rule_from_58081" {
+  from_port = 58081
   protocol = "TCP"
   security_group_id = aws_security_group.alb_sg.id
-  cidr_blocks = ["0.0.0.0/0"]
-  to_port = 48081
+  cidr_blocks = ["178.54.1.152/32"]
+  to_port = 58081
   type = "ingress"
-  description = "Provides access on 80 port"
+  description = "Provides access on 58081 port"
 }
 
 resource "aws_security_group_rule" "alb_sg_ingress_rule_from_443" {
@@ -112,7 +112,7 @@ resource "aws_lb_listener" "https-listener" {
 
 resource "aws_lb_listener" "tcp-listener" {
   load_balancer_arn = aws_lb.vscan-network-alb.arn
-  port              = "48081"
+  port              = "58081"
   protocol          = "TCP"
 
   default_action {

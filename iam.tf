@@ -100,7 +100,10 @@ resource "aws_iam_policy" "vscan-api-task-policy" {
             "Action": [
                 "dynamodb:*"
             ],
-            "Resource": "${aws_dynamodb_table.file-scan-results-dynamodb-table.arn}"
+            "Resource": [
+                "${aws_dynamodb_table.file-scan-results-dynamodb-table.arn}",
+                "${aws_dynamodb_table.file-scan-results-dynamodb-table.arn}/*"
+            ]
         }
     ]
 }
