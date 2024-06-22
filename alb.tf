@@ -12,7 +12,7 @@ resource "aws_security_group_rule" "alb_sg_ingress_rule_from_58081" {
   from_port = 58081
   protocol = "TCP"
   security_group_id = aws_security_group.alb_sg.id
-  cidr_blocks = ["178.54.1.152/32"]
+  cidr_blocks = ["0.0.0.0/0"]
   to_port = 58081
   type = "ingress"
   description = "Provides access on 58081 port"

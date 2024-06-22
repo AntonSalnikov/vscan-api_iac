@@ -17,7 +17,7 @@ resource "aws_dynamodb_table" "file-scan-results-dynamodb-table" {
   global_secondary_index {
     name               = "sha256Hash-index"
     hash_key           = "sha256Hash"
-    projection_type    = "KEYS_ONLY"
+    projection_type    = "ALL"
   }
 
   tags = local.tags
